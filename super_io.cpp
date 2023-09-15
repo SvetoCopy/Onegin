@@ -1,63 +1,120 @@
 #include "super_io.h"
-#include "assert.h"
-#include <sys\stat.h>
-#include <stdlib.h>
+
 
 
 FileInfo FileInfoCtor(const char* file_name) {
 	FileInfo file = {};
 	file.name = file_name;
+
+	fopen_s(&file.input_file, file.name, "r");
+
+	assert(file.input_file != NULL);
+
+	file.buff_size = GetFileSize(&file);
+	
+
+	file.buff = (char*)calloc(file.buff_size, sizeof(char));
 	ReadFile(&file);
+
+	file.n_lines = GetLinesCount(&file);
+	file.text = (char**)(calloc(GetFileSize(&file), sizeof(char*)));
+
+	
+	ReadBuff(&file);
 	return file;
 }
 
 void FileInfoDtor(FileInfo* file) {
-	free(file->buff);
-	for (size_t i = 0; i < file->n_lines; ++i) {
-		file->text[i] = NULL;
-	}
+	free(file->text);
+	//free(file->buff);
+
+
 	file->buff_size = 0;
 	file->n_lines = 0;
 	file->buff = NULL;
 }
 
 void ReadBuff(FileInfo* file) {
-	// sym_count
-	// str_count
-	size_t i = 0;
-	size_t j = 0;
+	size_t sym_count = 0;
+	size_t str_count = 0;
 
-	file->text[j] = file->buff;
-	j++;
-	while (file->buff[i] != EOF) {
-		if (file->buff[i] == '\n') {
-			file->text[j] = file->buff + i + 1;
-			j++;
-			file->buff[i] = '\0';
+	assert(file != NULL);
+
+	file->text[str_count] = file->buff;
+	str_count++;
+
+	while (sym_count < file->buff_size) {
+		if (file->buff[sym_count] == '\n') {
+			file->text[str_count] = file->buff + sym_count + 1;
+
+			str_count++;
+			file->buff[sym_count] = '\0';
+			
 		}
-		i++;
+		//printf("%c", file->buff[sym_count]);
+		sym_count++;
 	}
-	file->n_lines = j;
 }
 
+void PrintData(char* data[], int size) {
+	printf("\n");
+
+	for (int i = 0; i < size; i++) {
+		printf("<%s>\n", data[i]);
+	}
+	
+
+}
+
+void DebugPrint(char* data[], int left, int right, int size, int mid) {
+	int flag = 0;
+	for (int i = 0; i < (size); i++) {
+		if (i == left) {
+			printf("<");
+		}
+		if (i == (right + 1)) {
+			printf(">");
+			flag++;
+		}
+
+		printf(" %s ", data[i]);
+	}
+	if (!flag) printf(">");
+	printf("left = %d right = %d mid = %d, data[mid] = %s", left, right, mid, data[mid]);
+	printf("\n");
+}
+
+
 size_t GetFileSize(FileInfo* file) {
+
+	assert(file != NULL);
+
 	fseek(file->input_file, 0, SEEK_END);
 	size_t file_size = ftell(file->input_file);
 	fseek(file->input_file, 0, SEEK_SET);
 	return file_size;
 }
 
+size_t GetLinesCount(FileInfo* file) {
+	size_t count = 1;
+	size_t i = 0;
+
+	assert(file != NULL);
+	
+	while (i < file->buff_size) {
+		if (file->buff[i] == '\n') {
+			count++;
+		}
+		i++;
+	}
+	return count;
+}
+
 void ReadFile(FileInfo* file) {
 	fopen_s(&file->input_file, file->name, "r");
-	file->buff_size = GetFileSize(file);
-
-	file->buff = (char*)calloc(file->buff_size, sizeof(char));
-
+	
 	assert(file->input_file != NULL);
 	assert(file->buff != NULL);
 
 	fread(file->buff, sizeof(char), file->buff_size, file->input_file);
-
-	ReadBuff(file);
-	//printf("%s %s %s", text[0], text[1], text[2]);
 }
