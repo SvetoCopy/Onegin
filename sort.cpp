@@ -75,11 +75,13 @@ void QSort(char* data[], int left, int right) {
 int Partition(char* data[], int left, int right) {
 	int mid = left + (rand() % (right - left + 1));
 	char* pivot = data[mid];
-	int size = 7;
+	int size = 24;
 
 	//printf("%d %d\n", pivot, mid);
 	while (left < right) {
+
 		DebugPrint(data, left, right, size, mid);
+		if (Comparator(&data[left], &data[right]) == 0) left++;
 		while (Comparator(&data[left], &pivot) == -1) {
 			left++;
 			DebugPrint(data, left, right, size, mid);
@@ -87,8 +89,8 @@ int Partition(char* data[], int left, int right) {
 		while (Comparator(&data[right], &pivot) == 1) {
 			right--;
 			DebugPrint(data, left, right, size, mid);
-
 		}
+		
 		if (left < right) {
 			
 			char* tmp = data[left];
@@ -103,5 +105,5 @@ int Partition(char* data[], int left, int right) {
 		}
 		DebugPrint(data, left, right, size, mid);
 	}
-	return mid;
+	return right;
 }

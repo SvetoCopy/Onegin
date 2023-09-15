@@ -19,10 +19,10 @@ int main()
     const char* name = "onegin.txt";
     FileInfo file = FileInfoCtor(name);
     //FileInfoDtor(&file);
-    QSort(file.text, 0, 6);
+    QSort(file.text, 0, file.n_lines - 1);
     //QSort(file.text, 0, 6);
     printf("\n");
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < file.n_lines; i++) {
         printf("%s\n", file.text[i]);
     }
 
