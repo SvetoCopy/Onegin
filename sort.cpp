@@ -43,20 +43,23 @@ void PrintData(char* data[], int size) {
 void Sort(char* data[], int size) {
 	printf("Before:");
 	PrintData(data, size);
+
 	qsort(data, size, sizeof(data[0]), Comparator);
+
 	printf("After:");
 	PrintData(data, size);
 }
 
 void QSort(char* data[], int left, int right) {
-	if (left == right) return;
+	printf("\nQSORT FROM: %d TO: %d\n", left, right);
+	if (left >= right) return;
 	if (left - right == 1) {
-		if (Comparator(data[left], data[right]) == -1) {
+		if (Comparator(&data[left], &data[right]) == -1) {
 			char* tmp = data[left];
 			data[left] = data[right];
 			data[right] = tmp;
 		}
-		else if (Comparator(data[left], data[right]) == 1) {
+		else if (Comparator(&data[left], &data[right]) == 1) {
 			char* tmp = data[left];
 			data[left] = data[right];
 			data[right] = tmp;
@@ -64,7 +67,7 @@ void QSort(char* data[], int left, int right) {
 		return;
 	}
 	int mid = Partition(data, left, right);
-	QSort(data, left, mid);
+	QSort(data, left, mid-1);
 	QSort(data, mid+1, right);
 	
 }
@@ -72,15 +75,16 @@ void QSort(char* data[], int left, int right) {
 int Partition(char* data[], int left, int right) {
 	int mid = left + (rand() % (right - left + 1));
 	char* pivot = data[mid];
-	int size = right - left + 1;
+	int size = 7;
+
 	//printf("%d %d\n", pivot, mid);
 	while (left < right) {
 		DebugPrint(data, left, right, size, mid);
-		while (Comparator(data[left], pivot) == -1) {
+		while (Comparator(&data[left], &pivot) == -1) {
 			left++;
 			DebugPrint(data, left, right, size, mid);
 		}
-		while (Comparator(data[right], pivot) == 1) {
+		while (Comparator(&data[right], &pivot) == 1) {
 			right--;
 			DebugPrint(data, left, right, size, mid);
 
@@ -95,11 +99,9 @@ int Partition(char* data[], int left, int right) {
 				mid = right;
 			}
 			else if (right == mid) mid = left;
-			left++;
-			right--;
+			
 		}
 		DebugPrint(data, left, right, size, mid);
 	}
-	printf("\n\nNext QSort\n");
 	return mid;
 }
