@@ -3,36 +3,61 @@
 #include <sys\stat.h>
 #include <stdlib.h>
 
-void ReadBuff(char* buff, char* text[]) {
+
+FileInfo FileInfoCtor(const char* file_name) {
+	FileInfo file = {};
+	file.name = file_name;
+	ReadFile(&file);
+	return file;
+}
+
+void FileInfoDtor(FileInfo* file) {
+	free(file->buff);
+	for (size_t i = 0; i < file->n_lines; ++i) {
+		file->text[i] = NULL;
+	}
+	file->buff_size = 0;
+	file->n_lines = 0;
+	file->buff = NULL;
+}
+
+void ReadBuff(FileInfo* file) {
+	// sym_count
+	// str_count
 	size_t i = 0;
 	size_t j = 0;
 
-	text[j] = buff;
+	file->text[j] = file->buff;
 	j++;
-	while (buff[i] != EOF) {
-		if (buff[i] == '\n') {
-			text[j] = buff + i + 1;
+	while (file->buff[i] != EOF) {
+		if (file->buff[i] == '\n') {
+			file->text[j] = file->buff + i + 1;
 			j++;
-			buff[i] = '\0';
+			file->buff[i] = '\0';
 		}
 		i++;
 	}
+	file->n_lines = j;
 }
 
-void ReadFile(const char* file_name, char* text[]) {
-	FILE* f = NULL;
-	fopen_s(&f, file_name, "r");
+size_t GetFileSize(FileInfo* file) {
+	fseek(file->input_file, 0, SEEK_END);
+	size_t file_size = ftell(file->input_file);
+	fseek(file->input_file, 0, SEEK_SET);
+	return file_size;
+}
 
-	struct stat stats;
-	stat(file_name, &stats);
+void ReadFile(FileInfo* file) {
+	fopen_s(&file->input_file, file->name, "r");
+	file->buff_size = GetFileSize(file);
 
-	char* buff = (char*)calloc(stats.st_size, sizeof(char));
+	file->buff = (char*)calloc(file->buff_size, sizeof(char));
 
-	assert(f != NULL);
-	assert(buff != NULL);
+	assert(file->input_file != NULL);
+	assert(file->buff != NULL);
 
-	fread(buff, sizeof(char), stats.st_size, f);
+	fread(file->buff, sizeof(char), file->buff_size, file->input_file);
 
-	ReadBuff(buff, text);
+	ReadBuff(file);
 	//printf("%s %s %s", text[0], text[1], text[2]);
 }
