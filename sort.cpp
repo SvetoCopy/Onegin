@@ -1,6 +1,7 @@
 #include "sort.h"
+#include <assert.h>
 
-void DebugPrint(int data[], int left, int right, int size, int mid) {
+void DebugPrint(char* data[], int left, int right, int size, int mid) {
 	int flag = 0;
 	for (int i = 0; i < (size); i++) {
 		if (i == left) {
@@ -11,31 +12,23 @@ void DebugPrint(int data[], int left, int right, int size, int mid) {
 			flag++;
 		}
 		
-		printf(" %d ", data[i]);
+		printf(" %s ", data[i]);
 	}
 	if (!flag) printf(">");
-	printf("left = %d right = %d mid = %d, data[mid] = %d",left,right, mid, data[mid]);
+	printf("left = %d right = %d mid = %d, data[mid] = %s",left,right, mid, data[mid]);
 	printf("\n");
 }
 
+int Comparator(const void* p1, const void* p2)
+{
+	char* s1 = *(char**)p1;
+	char* s2 = *(char**)p2;
 
-
-int Comparator(const void* x , const void* y) {
-	char* a = (char*)x;
-	char* b = (char*)y;
-	while (*a != '\0' && *b != '\0') {
-		if (*a < *b) return -1;
-		if (*a > *b) return 1;
-		a++;
-		b++;
-	}
-	if (*a == '\0' && *b == '\0') return 0;
-	else if (*a == '\0') return -1;
-	return 1;
+	return strcmp(s1, s2);
 }
 
-void Swap(int* a, int* b) {
-	int tmp = *a;
+void Swap(const char** a,const char** b) {
+	const char* tmp = *a;
 	*a = *b;
 	*b = tmp;
 }
@@ -50,30 +43,54 @@ void PrintData(char* data[], int size) {
 void Sort(char* data[], int size) {
 	printf("Before:");
 	PrintData(data, size);
-	qsort(data, size, sizeof(char*), Comparator);
+	qsort(data, size, sizeof(data[0]), Comparator);
 	printf("After:");
 	PrintData(data, size);
 }
 
-int Partition(int data[], int left, int right, int size) {
-	//int mid = left + (rand() % (right - left + 1));
-	int mid = 8;
-	int pivot = data[mid];
-	printf("%d %d\n", pivot, mid);
+void QSort(char* data[], int left, int right) {
+	if (left == right) return;
+	if (left - right == 1) {
+		if (Comparator(data[left], data[right]) == -1) {
+			char* tmp = data[left];
+			data[left] = data[right];
+			data[right] = tmp;
+		}
+		else if (Comparator(data[left], data[right]) == 1) {
+			char* tmp = data[left];
+			data[left] = data[right];
+			data[right] = tmp;
+		}
+		return;
+	}
+	int mid = Partition(data, left, right);
+	QSort(data, left, mid);
+	QSort(data, mid+1, right);
+	
+}
+
+int Partition(char* data[], int left, int right) {
+	int mid = left + (rand() % (right - left + 1));
+	char* pivot = data[mid];
+	int size = right - left + 1;
+	//printf("%d %d\n", pivot, mid);
 	while (left < right) {
 		DebugPrint(data, left, right, size, mid);
-		while (data[left] < pivot) {
+		while (Comparator(data[left], pivot) == -1) {
 			left++;
-			DebugPrint(data, left, right, size,mid);
+			DebugPrint(data, left, right, size, mid);
 		}
-		while (data[right] > pivot) {
+		while (Comparator(data[right], pivot) == 1) {
 			right--;
 			DebugPrint(data, left, right, size, mid);
 
 		}
 		if (left < right) {
 			
-			Swap(data+left, data+right);
+			char* tmp = data[left];
+			data[left] = data[right];
+			data[right] = tmp;
+
 			if (left == mid) {
 				mid = right;
 			}
@@ -83,5 +100,6 @@ int Partition(int data[], int left, int right, int size) {
 		}
 		DebugPrint(data, left, right, size, mid);
 	}
+	printf("\n\nNext QSort\n");
 	return mid;
 }
