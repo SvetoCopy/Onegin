@@ -11,21 +11,21 @@ FileInfo FileInfoCtor(const char* file_name) {
 	assert(file.input_file != NULL);
 
 	file.buff_size = GetFileSize(&file);
-	
+
 
 	file.buff = (char*)calloc(file.buff_size, sizeof(char));
 	ReadFile(&file);
 
 	file.n_lines = GetLinesCount(&file);
-	file.text = (char**)(calloc(GetFileSize(&file), sizeof(char*)));
+	file.text = (char**)(calloc(file.n_lines, sizeof(char*)));
 
-	
+
 	ReadBuff(&file);
 	return file;
 }
 
 void FileInfoDtor(FileInfo* file) {
-	free(file->text);
+	//free(file->text);
 	//free(file->buff);
 
 
@@ -49,7 +49,7 @@ void ReadBuff(FileInfo* file) {
 
 			str_count++;
 			file->buff[sym_count] = '\0';
-			
+
 		}
 		//printf("%c", file->buff[sym_count]);
 		sym_count++;
@@ -62,7 +62,7 @@ void PrintData(char* data[], int size) {
 	for (int i = 0; i < size; i++) {
 		printf("<%s>\n", data[i]);
 	}
-	
+
 
 }
 
@@ -100,7 +100,7 @@ size_t GetLinesCount(FileInfo* file) {
 	size_t i = 0;
 
 	assert(file != NULL);
-	
+
 	while (i < file->buff_size) {
 		if (file->buff[i] == '\n') {
 			count++;
@@ -112,7 +112,7 @@ size_t GetLinesCount(FileInfo* file) {
 
 void ReadFile(FileInfo* file) {
 	fopen_s(&file->input_file, file->name, "r");
-	
+
 	assert(file->input_file != NULL);
 	assert(file->buff != NULL);
 
